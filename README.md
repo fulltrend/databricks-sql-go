@@ -1,5 +1,5 @@
 # Databricks SQL Driver for Go
-
+This fork contains few adjustments to enable cloudFetch configuration and lz4 compression using configuration options. 
 
 ![http://www.apache.org/licenses/LICENSE-2.0.txt](http://img.shields.io/:license-Apache%202-brightgreen.svg)
 
