@@ -24,6 +24,19 @@ import (
 	"github.com/databricks/databricks-sql-go/logger"
 )
 
+var httpClient = &http.Client{
+	Timeout: 120 * time.Second, // overall per-request deadline; prefer context for fine-grain
+	Transport: func() http.RoundTripper {
+		tr := http.DefaultTransport.(*http.Transport).Clone()
+		tr.MaxIdleConns = 100
+		tr.MaxIdleConnsPerHost = 10
+		tr.MaxConnsPerHost = tr.MaxIdleConnsPerHost * 2
+		tr.IdleConnTimeout = 90 * time.Second
+		// tr.ForceAttemptHTTP2 = true // default true on modern Go for HTTPS
+		return tr
+	}(),
+}
+
 type IPCStreamIterator interface {
 	Next() (io.Reader, error)
 	HasNext() bool
@@ -363,8 +376,7 @@ func fetchBatchBytes(
 	}
 
 	startTime := time.Now()
-	client := http.DefaultClient
-	res, err := client.Do(req)
+	res, err := httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}

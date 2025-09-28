@@ -12,6 +12,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/pkg/errors"
+
 	"github.com/databricks/databricks-sql-go/driverctx"
 	dbsqlerr "github.com/databricks/databricks-sql-go/errors"
 	"github.com/databricks/databricks-sql-go/internal/cli_service"
@@ -22,7 +24,6 @@ import (
 	"github.com/databricks/databricks-sql-go/internal/sentinel"
 	"github.com/databricks/databricks-sql-go/internal/thrift_protocol"
 	"github.com/databricks/databricks-sql-go/logger"
-	"github.com/pkg/errors"
 )
 
 type conn struct {
@@ -306,6 +307,7 @@ func (c *conn) executeStatement(ctx context.Context, query string, args []driver
 	// Add cloud fetch if supported and enabled
 	if thrift_protocol.SupportsCloudFetch(serverProtocolVersion) && c.cfg.UseCloudFetch {
 		req.CanDownloadResult_ = &c.cfg.UseCloudFetch
+		req.MaxBytesPerFile = &c.cfg.MaxBytesPerFile
 	}
 
 	// Add Arrow support if supported and enabled
